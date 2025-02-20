@@ -2,6 +2,10 @@
 io.stdout:setvbuf('no')
 
 function love.load()
+
+    -- Set fullscreen mode
+    love.window.setMode(0, 0, { fullscreen = true }) 
+
     -- Ball properties
     ball = {
         x = 200,
