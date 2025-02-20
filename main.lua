@@ -13,6 +13,10 @@ function love.load()
         restitution = 0.6 -- Bounciness factor
     }
 
+    -- Walls
+    wallLeft = 50
+    wallRight = 350
+
     -- Stationary circles (pins)
     pins = {
         {x = 150, y = 300, radius = 10},
@@ -35,39 +39,50 @@ function love.update(dt)
         ball.speedY = -ball.speedY * ball.restitution
     end
 
+    -- Collision with walls
+    if ball.x - ball.radius < wallLeft then
+        ball.x = wallLeft + ball.radius
+        ball.speedX = -ball.speedX * ball.restitution
+    elseif ball.x + ball.radius > wallRight then
+        ball.x = wallRight - ball.radius
+        ball.speedX = -ball.speedX * ball.restitution
+    end
+
     -- Collision with pins
     for _, pin in ipairs(pins) do
         local dx = ball.x - pin.x
         local dy = ball.y - pin.y
         local distance = math.sqrt(dx * dx + dy * dy)
-        local minDistance = ball.radius + pin.radius
+        local minDist = ball.radius + pin.radius
 
-        if distance < minDistance then
-            -- Normalize the collision normal
+        if distance < minDist then
+            -- Calculate normal vector
             local nx, ny = dx / distance, dy / distance
-
             -- Reflect velocity
-            local dotProduct = ball.speedX * nx + ball.speedY * ny
-            ball.speedX = ball.speedX - 2 * dotProduct * nx
-            ball.speedY = ball.speedY - 2 * dotProduct * ny
-
+            local dot = ball.speedX * nx + ball.speedY * ny
+            ball.speedX = ball.speedX - 2 * dot * nx
+            ball.speedY = ball.speedY - 2 * dot * ny
             -- Apply restitution
             ball.speedX = ball.speedX * ball.restitution
             ball.speedY = ball.speedY * ball.restitution
-
-            -- Move the ball out of the pin to prevent sticking
-            ball.x = pin.x + nx * minDistance
-            ball.y = pin.y + ny * minDistance
+            -- Move ball out of collision
+            ball.x = pin.x + nx * minDist
+            ball.y = pin.y + ny * minDist
         end
     end
 end
 
 function love.draw()
-    -- Draw the ball
+    -- Draw walls
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.rectangle("fill", wallLeft - 5, 0, 10, love.graphics.getHeight())
+    love.graphics.rectangle("fill", wallRight - 5, 0, 10, love.graphics.getHeight())
+
+    -- Draw ball
     love.graphics.setColor(1, 0, 0)
     love.graphics.circle("fill", ball.x, ball.y, ball.radius)
 
-    -- Draw the pins
+    -- Draw pins
     love.graphics.setColor(0, 0, 1)
     for _, pin in ipairs(pins) do
         love.graphics.circle("fill", pin.x, pin.y, pin.radius)
