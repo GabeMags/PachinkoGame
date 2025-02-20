@@ -20,6 +20,7 @@ function love.load()
     -- Walls
     wallLeft = 50
     wallRight = 350
+    floorY = love.graphics.getHeight() - 50 -- Floor positioned near the bottom
 
     -- Stationary circles (pins)
     pins = {
@@ -52,6 +53,12 @@ function love.update(dt)
         ball.speedX = -ball.speedX * ball.restitution
     end
 
+    -- Collision with floor
+    if ball.y + ball.radius > floorY then
+        ball.y = floorY - ball.radius
+        ball.speedY = -ball.speedY * ball.restitution
+    end
+
     -- Collision with pins
     for _, pin in ipairs(pins) do
         local dx = ball.x - pin.x
@@ -79,8 +86,9 @@ end
 function love.draw()
     -- Draw walls
     love.graphics.setColor(1, 1, 1)
-    love.graphics.rectangle("fill", wallLeft - 5, 0, 10, love.graphics.getHeight())
-    love.graphics.rectangle("fill", wallRight - 5, 0, 10, love.graphics.getHeight())
+    love.graphics.rectangle("fill", wallLeft - 5, 0, 10, love.graphics.getHeight()) -- Left wall
+    love.graphics.rectangle("fill", wallRight - 5, 0, 10, love.graphics.getHeight()) -- Right wall
+    love.graphics.rectangle("fill", wallLeft, floorY, wallRight - wallLeft, 10) -- Floor
 
     -- Draw ball
     love.graphics.setColor(1, 0, 0)
